@@ -70,7 +70,7 @@ def train(args):
         state = torch.load(args.checkpoint)
         print('load ' + args.checkpoint)
         net.load_state_dict(state, strict=True)
-        net.cuda()
+        net.cuda(args.device)
         smoothed_auc, smoothed_auc_avg, _ = val(args, net)
         exit(0)
 
