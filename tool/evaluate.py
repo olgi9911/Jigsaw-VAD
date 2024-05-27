@@ -12,7 +12,7 @@ import pickle
 from sklearn import metrics
 import math
 import json
-DATA_DIR='/irip/wangguodong_2020/projects/datasets/vad/'
+DATA_DIR='../'
 
 # normalize scores in each sub video
 NORMALIZE = True
@@ -236,11 +236,11 @@ class GroundTruthLoader(object):
         return gt
 
     def __load_avenue_gt(self, dataset):
-        root = '/irip/wangguodong_2020/projects/datasets/vad/avenue/ground_truth_demo/testing_label_mask'
+        root = '../avenue/ground_truth_demo/testing_label_mask'
         assert dataset in self.mapping, 'there is no dataset named {} \n Please check {}' \
             .format(dataset, GroundTruthLoader.NAME_MAT_MAPPING.keys())
 
-        num_video = 21
+        num_video = 5
         dataset_video_folder = GroundTruthLoader.NAME_FRAMES_MAPPING[dataset]
         video_list = os.listdir(dataset_video_folder)
         video_list.sort()
@@ -539,7 +539,7 @@ def compute_auc_average(res, reverse, smoothing):
     auc_list = []
     dataset, psnr_records, gt = load_psnr_gt(res)
 
-    file_name_dir = '/irip/wangguodong_2020/projects/datasets/vad/' + dataset +  '/testing'
+    file_name_dir = '../' + dataset +  '/testing'
     file_name = os.listdir(file_name_dir)
     file_name.sort()
 

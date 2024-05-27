@@ -13,7 +13,7 @@ import math
 
 def video_label_length(dataset='shanghaitech'):
     if dataset == 'shanghaitech':
-        label_path = "/irip/wangguodong_2020/projects/datasets/vad/shanghaitech/frame_masks/"
+        label_path = "../shanghaitech/frame_masks/"
         video_length = {}
         files = sorted(os.listdir(label_path))
         length = 0
@@ -22,7 +22,7 @@ def video_label_length(dataset='shanghaitech'):
             video_length[f.split(".")[0]] = label.shape[0]
             length += label.shape[0]
     elif dataset in ['ped1', 'ped2', 'avenue']:
-        test_frame_path = '/irip/wangguodong_2020/projects/datasets/vad/' + dataset + '/testing/'
+        test_frame_path = '../' + dataset + '/testing/'
         files = sorted(os.listdir(test_frame_path))
         video_length = {}
         for f in files:
@@ -49,7 +49,7 @@ def score_smoothing(score, ws=43, function='mean', sigma=10):
 
 
 def load_objects(dataset, frame_num=7):
-    root = '/irip/wangguodong_2020/projects/datasets/vad'
+    root = '../'
     data_dir = os.path.join(root, dataset, 'testing') 
 
     file_list = sorted(os.listdir(data_dir))
@@ -61,7 +61,7 @@ def load_objects(dataset, frame_num=7):
     if dataset == 'ped2':
         filter_ratio = 0.5
     elif dataset == 'avenue':
-        filter_ratio = 0.8
+        filter_ratio = 0.9
 
     objects_list = []
     videos_list = []
@@ -105,7 +105,7 @@ def load_objects(dataset, frame_num=7):
     return objects_list
 
 
-def remake_video_3d_output(video_output, dataset='ped2', frame_num=7):
+def remake_video_3d_output(video_output, dataset='ped2', frame_num=5):
     object_list = load_objects(dataset, frame_num=frame_num)
 
     video_length = video_label_length(dataset=dataset)

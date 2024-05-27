@@ -37,7 +37,7 @@ def get_configs():
 
     args.device = torch.device("cuda:{}".format(args.gpu_id) if torch.cuda.is_available() else "cpu")
     if args.dataset in ['shanghaitech', 'avenue']:
-        args.filter_ratio = 0.8
+        args.filter_ratio = 0.9
     elif args.dataset == 'ped2':
         args.filter_ratio = 0.5
     return args
@@ -53,7 +53,7 @@ def train(args):
         print("-------------{} : {}".format(k, v))
 
     # Load Data
-    data_dir = f"/irip/wangguodong_2020/projects/datasets/vad/{args.dataset}/training"
+    data_dir = f"../{args.dataset}/training"
     detect_pkl = f'detect/{args.dataset}_train_detect_result_yolov3.pkl'
 
     vad_dataset = VideoAnomalyDataset_C3D(data_dir, 
@@ -146,7 +146,7 @@ def val(args, net=None):
     print("The running_date : {}".format(running_date))
 
     # Load Data
-    data_dir = f"/irip/wangguodong_2020/projects/datasets/vad/{args.dataset}/testing"
+    data_dir = f"../{args.dataset}/testing"
     detect_pkl = f'detect/{args.dataset}_test_detect_result_yolov3.pkl'
 
     testing_dataset = VideoAnomalyDataset_C3D(data_dir, 
