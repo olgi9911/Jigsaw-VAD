@@ -78,6 +78,7 @@ def train(args):
     net = net.train()
 
     criterion = nn.CrossEntropyLoss(reduction='mean')
+    criterion_temp = nn.BCEWithLogitsLoss(reduction='mean')
     optimizer = optim.Adam(params=net.parameters(), lr=1e-4)
 
     # Train
@@ -96,14 +97,14 @@ def train(args):
             n_temp = t_flag.sum().item()
 
             obj = obj.cuda(args.device, non_blocking=True)
-            temp_labels = temp_labels[t_flag].long().view(-1).cuda(args.device)
+            temp_labels = temp_labels[t_flag].float().view(-1).cuda(args.device)
             spat_labels = spat_labels[~t_flag].long().view(-1).cuda(args.device)
 
             temp_logits, spat_logits = net(obj)
-            temp_logits = temp_logits[t_flag].view(-1, args.sample_num)
+            temp_logits = temp_logits[t_flag].view(-1)
             spat_logits = spat_logits[~t_flag].view(-1, 9)
 
-            temp_loss = criterion(temp_logits, temp_labels)
+            temp_loss = criterion_temp(temp_logits, temp_labels)
             spat_loss = criterion(spat_logits, spat_labels)
 
             loss = temp_loss + spat_loss
@@ -166,16 +167,17 @@ def val(args, net=None):
     
         with torch.no_grad():
             temp_logits, spat_logits = net(obj)
-            temp_logits = temp_logits.view(-1, args.sample_num, args.sample_num)
+            temp_logits = temp_logits.view(-1, 1)
             spat_logits = spat_logits.view(-1, 9, 9)
 
         spat_probs = F.softmax(spat_logits, -1)
         diag = torch.diagonal(spat_probs, offset=0, dim1=-2, dim2=-1)
         scores = diag.min(-1)[0].cpu().numpy()
 
-        temp_probs = F.softmax(temp_logits, -1)
-        diag2 = torch.diagonal(temp_probs, offset=0, dim1=-2, dim2=-1)
-        scores2 = diag2.min(-1)[0].cpu().numpy()
+        temp_probs = torch.sigmoid(temp_logits)
+        scores2 = 1 - temp_probs.cpu().numpy()
+        #diag2 = torch.diagonal(temp_probs, offset=0, dim1=-2, dim2=-1)
+        #scores2 = diag2.min(-1)[0].cpu().numpy()
         
         for video_, frame_, s_score_, t_score_  in zip(videos, frames, scores, scores2):
             if video_ not in video_output:

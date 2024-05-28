@@ -115,11 +115,15 @@ class VideoAnomalyDataset_C3D(Dataset):
         record = self.objects_list[idx]
         if self.test_stage:
             perm = np.arange(self.frame_num)
+            temporal_label = 0
         else:
-            if random.random() < 0.0001:
+            if random.random() < 0.5: # Set the normal:abnormal ratio to 1:1
                 perm = np.arange(self.frame_num)
+                temporal_label = 0
             else:
                 perm = np.random.permutation(self.frame_num)
+                temporal_label = 1
+
         obj = self.get_object(record["video_name"], record["frame"], record["object"])
 
         if not temproal_flag and not self.test_stage:
@@ -142,7 +146,7 @@ class VideoAnomalyDataset_C3D(Dataset):
             obj = obj[:, perm, :, :]
         obj = torch.clamp(obj, 0., 1.)
 
-        ret = {"video": record["video_name"], "frame": record["frame"], "obj": obj, "label": perm, 
+        ret = {"video": record["video_name"], "frame": record["frame"], "obj": obj, "label": temporal_label, 
             "trans_label": spatial_perm, "loc": record["loc"], "aspect_ratio": record["aspect_ratio"], "temporal": temproal_flag}
         return  ret
     

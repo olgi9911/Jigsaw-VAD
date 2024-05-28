@@ -45,7 +45,7 @@ class WideBranchNet(nn.Module):
         self.classifier_1 = nn.Sequential(
             nn.Linear(1024, 512),
             nn.ReLU(),
-            nn.Linear(512, self.num_classes[0])
+            nn.Linear(512, 1)
         )
         self.classifier_2 = nn.Sequential(
             nn.Linear(1024, 512),
