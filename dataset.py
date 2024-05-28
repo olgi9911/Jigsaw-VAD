@@ -5,6 +5,7 @@ import time
 import torch
 import random
 import pickle
+import itertools
 import numpy as np
 import torch.nn.functional as F
 from torchvision import transforms
@@ -61,6 +62,9 @@ class VideoAnomalyDataset_C3D(Dataset):
 
         self.objects_list = []
         self._load_data(file_list)
+
+        self.permutations = list(itertools.permutations(range(self.frame_num)))
+        self.perm_index = {perm: idx for idx, perm in enumerate(self.permutations)}
     
     def _load_data(self, file_list):
         t0 = time.time()
@@ -142,7 +146,7 @@ class VideoAnomalyDataset_C3D(Dataset):
             obj = obj[:, perm, :, :]
         obj = torch.clamp(obj, 0., 1.)
 
-        ret = {"video": record["video_name"], "frame": record["frame"], "obj": obj, "label": perm, 
+        ret = {"video": record["video_name"], "frame": record["frame"], "obj": obj, "label": self.perm_index[tuple(perm)], 
             "trans_label": spatial_perm, "loc": record["loc"], "aspect_ratio": record["aspect_ratio"], "temporal": temproal_flag}
         return  ret
     

@@ -64,7 +64,7 @@ def train(args):
                                           static_threshold=args.static_threshold)
 
     vad_dataloader = DataLoader(vad_dataset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
-    net = model.WideBranchNet(time_length=args.sample_num, num_classes=[args.sample_num ** 2, 81])
+    net = model.WideBranchNet(time_length=args.sample_num, num_classes=[120, 81]) # 5! = 120 possible permutations
 
     if args.checkpoint is not None:
         state = torch.load(args.checkpoint)
@@ -100,7 +100,7 @@ def train(args):
             spat_labels = spat_labels[~t_flag].long().view(-1).cuda(args.device)
 
             temp_logits, spat_logits = net(obj)
-            temp_logits = temp_logits[t_flag].view(-1, args.sample_num)
+            temp_logits = temp_logits[t_flag].view(-1, 120) # 5! = 120 possible permutations
             spat_logits = spat_logits[~t_flag].view(-1, 9)
 
             temp_loss = criterion(temp_logits, temp_labels)
@@ -166,7 +166,7 @@ def val(args, net=None):
     
         with torch.no_grad():
             temp_logits, spat_logits = net(obj)
-            temp_logits = temp_logits.view(-1, args.sample_num, args.sample_num)
+            temp_logits = temp_logits.view(-1, 120) # 5! = 120 possible permutations
             spat_logits = spat_logits.view(-1, 9, 9)
 
         spat_probs = F.softmax(spat_logits, -1)
@@ -174,8 +174,8 @@ def val(args, net=None):
         scores = diag.min(-1)[0].cpu().numpy()
 
         temp_probs = F.softmax(temp_logits, -1)
-        diag2 = torch.diagonal(temp_probs, offset=0, dim1=-2, dim2=-1)
-        scores2 = diag2.min(-1)[0].cpu().numpy()
+        #diag2 = torch.diagonal(temp_probs, offset=0, dim1=-2, dim2=-1)
+        scores2 = temp_probs[:, 0].cpu().numpy() # Probability of permutation #1
         
         for video_, frame_, s_score_, t_score_  in zip(videos, frames, scores, scores2):
             if video_ not in video_output:
